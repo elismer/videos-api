@@ -1,0 +1,106 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Simple API for get videos by categories.",
+    "version": "1.0.0",
+    "title": "Videos API"
+  },
+  "host": "localhost:300",
+  "basePath": "/api",
+  "tags": [
+    {
+      "name": "api"
+    }
+  ],
+  "schemes": ["http"],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["api"],
+        "summary": "Get categories whit videos",
+        "description": "",
+        "operationId": "getCategories",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Array whit name of categories is need to search videos",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Request"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categories whit videos",
+            "schema": {
+              "$ref": "#/definitions/Categories"
+            }
+          },
+          "500": {
+            "description": "Internal Server error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Request": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "example": ["Comedy", "Kids", "Blog"]
+    },
+    "Categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Sports"
+          },
+          "videos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Video"
+            }
+          }
+        }
+      }
+    },
+    "Video": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "Best goals Lionel Messi 2019/2020"
+        },
+        "description": {
+          "type": "string",
+          "example": "Lorem ipsum dolor sit amet consectetur adipiscing elit ultricies tellus consequat, feugiat scelerisque pulvinar curae risus massa fusce mollis porta diam sapien, aptent pretium proin viverra aenean tortor semper varius turpis."
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "example": [
+            "https://marriott.com/blandit/ultrices/enim/lorem.jpg",
+            "http://mysql.com/enim/lorem/ipsum/dolor/sit/amet.jpg"
+          ]
+        },
+        "thumb": {
+          "type": "string",
+          "example": "http://dummyimage.com/135x100.png/cc0000/ffffff"
+        }
+      }
+    }
+  }
+}
