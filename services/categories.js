@@ -1,5 +1,4 @@
 const MongoLib = require('../lib/mongo');
-const VideosService = require('./videos');
 class CategoriesService {
   constructor() {
     this.collection = 'categories';
@@ -7,22 +6,34 @@ class CategoriesService {
   }
 
   async getCategories({ categories }) {
-    const query = categories ? { name: { $in: categories } } : {};
-    const categoriesFilter = await this.mongoDB.getAll(this.collection, query);
-    const videosService = new VideosService();
-    const response = await categoriesFilter.reduce(
-      async (previousPromise, curr) => {
-        const acc = await previousPromise;
-        const videos = await videosService.getVideos({ categories: [curr.id] });
-        acc.push({
-          name: curr.name,
-          videos,
-        });
-        return acc;
+    const aggregation = [
+      ...(categories ? [{ $match: { name: { $in: categories } } }] : []),
+      {
+        $lookup: {
+          from: 'videos',
+          let: { cat: '$id' },
+          pipeline: [
+            { $match: { $expr: { $in: ['$$cat', '$categories'] } } },
+            {
+              $project: {
+                title: 1,
+                description: 1,
+                thumb: 1,
+                source: 1,
+                _id: 0,
+              },
+            },
+          ],
+          as: 'videos',
+        },
       },
-      Promise.resolve([])
-    );
-    return response;
+      { $project: { name: 1, _id: 0, videos: 1 } },
+    ];
+    const categoriesFilter = await this.mongoDB.aggregate({
+      collection: this.collection,
+      aggregation,
+    });
+    return categoriesFilter;
   }
 }
 
